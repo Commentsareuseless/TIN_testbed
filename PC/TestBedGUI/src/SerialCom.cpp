@@ -40,28 +40,42 @@ void SerialCom::RefreshAvailableCOMPorts(std::vector<std::string>& listOfCOMs)
     }
 }
 
-SerialCom::SerialCom(const std::string& portName) :
-    COMPort(portName)
+SerialCom::SerialCom(const std::string& portName)
 {
+    if (portName == "COM-1")
+    {
+        GUIManager::PrintConsoleError("Invalid COM port");
+        isPortValid = false;
+        return;
+    }
     serialComInstanceList[COMPort] = std::make_unique<CSerialCommHelper>(CSerialCommHelper());
     auto& COMInst = serialComInstanceList[COMPort];
     COMInst->Init(portName);
     COMInst->Start();
+    isPortValid = true;
+    GUIManager::PrintConsoleInfo("Created new serial interface on " + COMPort);
 }
 
 SerialCom::~SerialCom()
 {
-    auto& COMInst = serialComInstanceList[COMPort];
-    COMInst->Stop();
-    COMInst->UnInit();
-    COMInst.release();
+    if (isPortValid)
+    {
+        auto& COMInst = serialComInstanceList[COMPort];
+        COMInst->Stop();
+        COMInst->UnInit();
+        COMInst.release();
+        GUIManager::PrintConsoleInfo("Relased serial interface on " + COMPort);
+    }
 }
 
 void SerialCom::PingCOM()
 {
     std::string buff;
 
+    GUIManager::PrintConsoleInfo("Pinging port " + COMPort);
+
     Write2COM(PING_REQ);
+    Sleep(100); // wait for uC
     ReadCOM(buff);
 
     if (buff == PING_RESP)

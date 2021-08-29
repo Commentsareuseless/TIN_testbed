@@ -18,7 +18,7 @@ namespace tb
         const wxColour* color)
     {
         wxRichTextCtrl* terminal = MainWindow::GetInstance()->GetTerminal();
-        char logPrefix[20];
+        char logPrefix[20] = {0};
         std::string logLabel;
 
         switch (llvl)
@@ -111,8 +111,8 @@ namespace tb
 
         if (selectedCOM.empty())
         {
-            PrintConsoleError("COM port not selected, default to COM3"); //idk why lul
-            return "COM3";
+            PrintConsoleError("COM port not selected, default to COM-1"); //idk why lul
+            return "COM-1";
         }
         return selectedCOM;
     }

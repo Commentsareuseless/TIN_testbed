@@ -26,6 +26,7 @@ public:
 private:
 	SerialCom(SerialCom&) = delete;	// No copying, One COM = One class instance
 	std::string COMPort;
+	bool isPortValid = false;
 };
 
 }
