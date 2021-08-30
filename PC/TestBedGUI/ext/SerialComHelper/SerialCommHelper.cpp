@@ -22,7 +22,7 @@ CDebugDump	m_DebugFile;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-#define ATLTRACE6 m_DebugFile.Dump
+//#define ATLTRACE6 m_DebugFile.Dump
 
 void CSerialCommHelper::InvalidateHandle(HANDLE& hHandle )
 {

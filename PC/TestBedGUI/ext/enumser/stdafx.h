@@ -50,7 +50,8 @@
 #include <utility>
 #include <array>
 
-#define ATLTRACE6 m_DebugFile.Dump
+// #define ATLTRACE6 m_DebugFile.Dump
+#define ATLTRACE6(...)	(void)(__VA_ARGS__)
 #define USE_DEBUGDUMP extern CDebugDump m_DebugFile;
 
 //Out of the box lets exclude support for CEnumerateSerial::UsingComDB on the Windows SDK 7.1 or earlier since msports.h
