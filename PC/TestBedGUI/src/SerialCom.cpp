@@ -41,6 +41,7 @@ void SerialCom::RefreshAvailableCOMPorts(std::vector<std::string>& listOfCOMs)
 }
 
 SerialCom::SerialCom(const std::string& portName)
+    : COMPort(portName)
 {
     if (portName == "COM-1")
     {
@@ -48,9 +49,35 @@ SerialCom::SerialCom(const std::string& portName)
         isPortValid = false;
         return;
     }
-    serialComInstanceList[COMPort] = std::make_unique<CSerialCommHelper>(CSerialCommHelper());
+    char buff[20] = {};
+    sprintf_s(buff, "\\\\.\\%s", portName.c_str());
+    std::string sPort{ buff };
+    GUIManager::PrintConsoleError("Port " + sPort);
+    serialComInstanceList[COMPort] = std::make_unique<CSerialCommHelper>();
     auto& COMInst = serialComInstanceList[COMPort];
-    COMInst->Init(portName);
+
+    //HANDLE hCom;
+    //hCom = ::CreateFile((LPCWSTR)sPort.c_str(),
+    //    GENERIC_READ | GENERIC_WRITE,//access ( read and write)
+    //    0,	//(share) 0:cannot share the COM port						
+    //    nullptr,	//security  (None)				
+    //    OPEN_EXISTING,// creation : open_existing
+    //    0,//FILE_FLAG_OVERLAPPED,// we want overlapped operation
+    //    nullptr// no templates file for COM port...
+    //);
+
+    /*if (hCom == INVALID_HANDLE_VALUE)
+    {
+        GUIManager::PrintConsoleError("Sth went wrong during port creation, with error " + std::to_string(GetLastError()));
+    }
+        isPortValid = false;
+    return;*/
+    if (COMInst->Init(sPort) != S_OK)
+    {
+        GUIManager::PrintConsoleError("Sth went wrong during port creation, with error " + std::to_string(GetLastError()));
+        isPortValid = false;
+        return;
+    }
     COMInst->Start();
     isPortValid = true;
     GUIManager::PrintConsoleInfo("Created new serial interface on " + COMPort);
@@ -74,11 +101,11 @@ void SerialCom::PingCOM()
 
     GUIManager::PrintConsoleInfo("Pinging port " + COMPort);
 
-    Write2COM(PING_REQ);
-    Sleep(100); // wait for uC
+    Write2COM("p");
+   // Sleep(100); // wait for uC
     ReadCOM(buff);
 
-    if (buff == PING_RESP)
+    if (buff == "y"/*PING_RESP*/)
     {
         GUIManager::PrintConsoleInfo("Found valid device on " + COMPort);
         return;

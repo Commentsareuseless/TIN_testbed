@@ -367,7 +367,7 @@ HRESULT CSerialCommHelper::Write (const char* data,DWORD dwSize)
 		iRet = WriteFile (m_hCommPort,data,dwSize,&dwBytesWritten  ,&ov);
 		if ( iRet == 0 )
 		{
-			WaitForSingleObject(ov.hEvent ,INFINITE);
+			WaitForSingleObject(ov.hEvent ,1000);
 		}
  
 	}//	while ( ov.InternalHigh != dwSize ) ;

@@ -66,7 +66,7 @@ public:
 		if ( !GetComputerName((LPWSTR)m_szComputerName,&dwSize))
 			dwSize = GetLastError ();
 		
-		if ( !m_fileDump.is_open ()) 
+		/*if ( !m_fileDump.is_open ()) 
 		{
 			std::string szTimeStamp = GetTime();
 			szFullPath.append ( GetTime(false) ); 
@@ -76,7 +76,7 @@ public:
 			m_fileDump  << _T("Starting log on computer: ") << m_szComputerName <<  
 				_T(" at ")<<szTimeStamp.c_str()  <<std::endl ;
 			m_fileDump << _T("------------------------------------------------------------------------------------------------------") <<std::endl << std::endl ;
-		}
+		}*/
 	}
 	inline void Dump (LPCSTR lpszFormat, ...)
 	{
