@@ -96,7 +96,7 @@ SerialCom::SerialCom(const std::string& portName)
 
     char buff[20] = {};
     sprintf_s(buff, "\\\\.\\%s", portName.c_str());
-    std::string sPort{ "\\\\.\\COM3" };
+    std::string sPort{ buff };
     GUIManager::PrintConsoleError("Port " + sPort);
     serialComInstanceList[COMPort] = std::make_unique<ce::ceSerial>(sPort, 9600, 8, 'N', 1);
 
