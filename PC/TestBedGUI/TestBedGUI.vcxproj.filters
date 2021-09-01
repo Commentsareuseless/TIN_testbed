@@ -37,6 +37,12 @@
     <Filter Include="Pliki źródłowe\unused">
       <UniqueIdentifier>{644fee7c-94ec-45eb-8cc9-b11098677cba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Pliki nagłówkowe\ext\ceSerial">
+      <UniqueIdentifier>{c0397b10-0af9-4e1d-a257-50803fca17ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\ext\ceSerial">
+      <UniqueIdentifier>{6d347a6b-132c-49c6-927f-4c72c40b22eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GUIManager.hpp">
@@ -75,6 +81,9 @@
     <ClInclude Include="src\TCParser.hpp">
       <Filter>Pliki nagłówkowe\unused</Filter>
     </ClInclude>
+    <ClInclude Include="ext\serial-master\ceSerial.h">
+      <Filter>Pliki nagłówkowe\ext\ceSerial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GUIManager.cpp">
@@ -109,6 +118,9 @@
     </ClCompile>
     <ClCompile Include="src\TCParser.cpp">
       <Filter>Pliki źródłowe\unused</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\serial-master\ceSerial.cpp">
+      <Filter>Pliki źródłowe\ext\ceSerial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -56,7 +56,12 @@ void TestSerialCommunication()
 {
 	SerialCom AVR_COM(GUIManager::GetSelectedCOM(ConnectedDevice::AVR));
 
-	AVR_COM.PingCOM();
+	if (AVR_COM.PingCOM())
+	{
+		GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+		return;
+	}
+	GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
 }
 
 void TestGPIO()

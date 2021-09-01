@@ -129,7 +129,7 @@ MainWindow::MainWindow() : wxFrame(
 	Bind(wxEVT_MENU, &MainWindow::OnRefreshTCtable, this, ID_REFRESH_TC_MENU);
 
 	RefreshTCtable();
-	RefreshCOMtable();
+	//RefreshCOMtable();
 }
 
 void MainWindow::RefreshTCtable()
