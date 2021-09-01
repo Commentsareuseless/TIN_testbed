@@ -3,8 +3,6 @@
 #include "../ext/enumser/stdafx.h"
 #include "../ext/enumser/enumser.h"
 
-#include "../ext/SerialComHelper/SerialCommHelper.h"
-
 #include "../ext/serial-master/ceSerial.h"
 
 #include "GUIManager.hpp"
@@ -120,7 +118,6 @@ SerialCom::~SerialCom()
 bool SerialCom::PingCOM()
 {
     std::string buff;
-    char mess[] = {"p"};
     auto& COMInst = serialComInstanceList[COMPort];
 
     GUIManager::PrintConsoleInfo("Pinging port " + COMPort);
@@ -130,11 +127,13 @@ bool SerialCom::PingCOM()
         COMInst->Open();
     }
 
-    COMInst->Write(mess, sizeof(mess));
+    Write2COM(PING_REQ);
     Sleep(100); // wait for uC
     ReadCOM(buff);
 
-    if (buff[0] == 'y'/*PING_RESP*/)
+    GUIManager::PrintConsoleDebug("On COM, got " + buff);
+
+    if (buff == PING_RESP)
     {
         GUIManager::PrintConsoleInfo("Found valid device on " + COMPort);
         return true;
@@ -156,7 +155,7 @@ void SerialCom::ReadCOM(std::string& messageBuff)
     auto& COMInst = serialComInstanceList[COMPort];
     bool succeededRead = true;
     int i = 0;
-    char buff[20] = {0};
+    char buff[40] = {0};
 
     //messageBuff.reserve(20); // wild guess xD
     if (!COMInst)
@@ -165,12 +164,11 @@ void SerialCom::ReadCOM(std::string& messageBuff)
         return;
     }
     
-    while (succeededRead && i < 20)
-    {
+    do{
         buff[i] = COMInst->ReadChar(succeededRead);
         ++i;
-    }
-
+    } while (succeededRead && i < 40);
+    buff[i - 1] = '\0';     // do not read last byte bcs its garbage :)
     messageBuff = std::move(std::string{ buff });
 }
 
