@@ -104,14 +104,22 @@ void TestGPIO()
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	STM_COM.ReadCOM(messageBuff);
 
-	for (int i{ 0 }; i < messageBuff.size(); ++i)
+	try
 	{
-		if (messageBuff[i] != EXPECTED_BITS_IN_PA[i])
+		for (int i{ 0 }; i < messageBuff.size(); ++i)
 		{
-			GUIManager::PrintConsoleError("Unexpected state on pin " + std::to_string(i));
-			GUIManager::PrintConsoleError("Expected " + EXPECTED_BITS_IN_PA[i]);
-			testVerdict = false;
+			if (messageBuff[i] != EXPECTED_BITS_IN_PA[i])
+			{
+				GUIManager::PrintConsoleError("Unexpected state on pin " + std::to_string(i));
+				GUIManager::PrintConsoleInfo("Expected " + EXPECTED_BITS_IN_PA[i]);
+				testVerdict = false;
+			}
 		}
+	}
+	catch (std::exception& exc) // catch oob exception from string
+	{
+		GUIManager::PrintTestState("Errors detected " + std::string{exc.what()}, TestResult::FAIL);
+		return;
 	}
 	if (testVerdict)
 	{
