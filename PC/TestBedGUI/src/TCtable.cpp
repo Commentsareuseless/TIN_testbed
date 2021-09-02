@@ -13,6 +13,8 @@
 #include "GUIManager.hpp"
 #include "SerialCom.hpp"
 
+#include <thread>
+
 
 namespace tb
 {
@@ -54,40 +56,69 @@ void ExampleTest()
 
 void TestSerialCommunication()
 {
-	SerialCom AVR_COM(GUIManager::GetSelectedCOM(ConnectedDevice::AVR));
+	std::string avr{ GUIManager::GetSelectedCOM(ConnectedDevice::AVR) };
+	std::string stm{ GUIManager::GetSelectedCOM(ConnectedDevice::STM) };
 
-	if (AVR_COM.PingCOM())
+	if (avr == stm || stm.empty())
 	{
-		GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
-		return;
+		GUIManager::PrintConsoleInfo("Specified 2 the same ports or only 1 port, pinging once");
+		if (!avr.empty())
+		{
+			SerialCom COM(avr);
+			if (COM.PingCOM())
+			{
+				GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+				return;
+			}
+		}
+		else
+		{
+			SerialCom COM(stm);
+			if (COM.PingCOM())
+			{
+				GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+				return;
+			}
+		}
 	}
+
 	GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
 }
 
 void TestGPIO()
 {
-	uint8_t controlByte = 0;
-	uint8_t dataByte = 0xff;
+	constexpr char AVR_SET_PINS_ON_PA[] = { "STPA" };
+	constexpr char STM_READ_AVR_PA[] = { "RDPA" };
+	constexpr char EXPECTED_BITS_IN_PA[] = { "11111" };
 
-	std::string message;
-	message.reserve(2);
+	bool testVerdict{ true };
+
+	std::string messageBuff{};
 
 	SerialCom AVR_COM(GUIManager::GetSelectedCOM(ConnectedDevice::AVR));
+	SerialCom STM_COM(GUIManager::GetSelectedCOM(ConnectedDevice::STM));
 
-	// Set message type to GPIO operation
-	controlByte |= GPIO;
-	// Select port A
-	controlByte |= PORTA;
-	// Write flag ON
-	controlByte |= WRITE;
+	AVR_COM.Write2COM(AVR_SET_PINS_ON_PA);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));	// Make sure avr finished (with some BIG margin hehe)
+	STM_COM.Write2COM(STM_READ_AVR_PA);
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	STM_COM.ReadCOM(messageBuff);
 
-	message[0] = controlByte;
-	message[1] = dataByte;
-
-	GUIManager::PrintConsoleInfo("Writting to AVR " + (char)controlByte + (char)dataByte);
-	AVR_COM.Write2COM(message);
-
-	GUIManager::PrintTestState("Idk if works hehe", TestResult::PASS);
+	for (int i{ 0 }; i < messageBuff.size(); ++i)
+	{
+		if (messageBuff[i] != EXPECTED_BITS_IN_PA[i])
+		{
+			GUIManager::PrintConsoleError("Unexpected state on pin " + std::to_string(i));
+			GUIManager::PrintConsoleError("Expected " + EXPECTED_BITS_IN_PA[i]);
+			testVerdict = false;
+		}
+	}
+	if (testVerdict)
+	{
+		GUIManager::PrintTestState("GPIO works", TestResult::PASS);
+		return;
+	}
+	GUIManager::PrintTestState("Errors detected", TestResult::FAIL);
 }
 
 ///////////////////////////////////////////////////////////////////////////
