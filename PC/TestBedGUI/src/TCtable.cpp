@@ -82,6 +82,15 @@ void TestSerialCommunication()
 		}
 	}
 
+	SerialCom STM_COM(stm);
+	SerialCom AVR_COM(avr);
+
+	if (STM_COM.PingCOM() && AVR_COM.PingCOM())
+	{
+		GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+		return;
+	}
+
 	GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
 }
 
