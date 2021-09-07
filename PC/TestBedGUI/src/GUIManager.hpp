@@ -23,7 +23,7 @@ enum class LogLevel : unsigned
 	TC_RESULT_ONLY,		/* Print only wheather test passed or failed */
 	INFO,				/* Print [INFO] messages, general info, may be in relase version */
 	ERR,				/* Print [ERROR] messages, for more precise info about test fail reason */
-	DEBUG,				/* Print [DEBUG] messages, for debugging, turn off for relase */
+	DBG,				/* Print [DEBUG] messages, for debugging, turn off for relase */
 	NUM_OF_OPTIONS
 };
 

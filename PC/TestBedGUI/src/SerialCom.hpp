@@ -19,10 +19,11 @@ public:
 		invoke functions of your choice :) */
 	SerialCom(const std::string& portName);
 	~SerialCom();
-	void PingCOM();
+	bool PingCOM();
 	void ReadCOM(std::string& messageBuff);
+	void ReadByte(char* messageBuff);
 	void Write2COM(const std::string& message);
-
+	void WriteByte(const char message);
 private:
 	SerialCom(SerialCom&) = delete;	// No copying, One COM = One class instance
 	std::string COMPort;

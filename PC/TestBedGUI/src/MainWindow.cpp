@@ -99,9 +99,9 @@ MainWindow::MainWindow() : wxFrame(
 	buttonBox->Add(beginTestB, 1, wxALL, BorderWidth);
 
 	selectionBox->Add(COMLabel_AVR, 0, wxALIGN_CENTER_HORIZONTAL);
-	selectionBox->Add(COMsel_AVR, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxLEFT | wxRIGHT, 14);
+	selectionBox->Add(COMsel_AVR, 0, wxEXPAND | wxLEFT | wxRIGHT, 14);
 	selectionBox->Add(COMLabel_STM, 0, wxALIGN_CENTER_HORIZONTAL);
-	selectionBox->Add(COMsel_STM, 0, wxALIGN_CENTER_HORIZONTAL | wxEXPAND | wxLEFT | wxRIGHT, 14);
+	selectionBox->Add(COMsel_STM, 0,  wxEXPAND | wxLEFT | wxRIGHT, 14);
 	selectionBox->Add(tcLabel, 0, wxALIGN_CENTER_HORIZONTAL);
 	selectionBox->Add(tcList, 1, wxEXPAND | wxALL, BorderWidth);
 	selectionBox->Add(buttonBox, 0,  wxALL | wxALIGN_CENTER , BorderWidth);

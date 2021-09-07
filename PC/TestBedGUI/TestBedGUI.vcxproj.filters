@@ -25,17 +25,17 @@
     <Filter Include="Pliki nagłówkowe\ext\enumser">
       <UniqueIdentifier>{30b1449e-3eca-4037-b27a-b6add4395ee0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pliki nagłówkowe\ext\SerialComHelper">
-      <UniqueIdentifier>{e9ccff0d-6a3f-441c-947b-261b6c96292a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pliki źródłowe\ext\SerialComHelper">
-      <UniqueIdentifier>{ae8c9fb2-7e9f-4f80-9c06-359f0e157608}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pliki nagłówkowe\unused">
       <UniqueIdentifier>{bb31694b-096f-412a-86f5-2bb88e0f86a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Pliki źródłowe\unused">
       <UniqueIdentifier>{644fee7c-94ec-45eb-8cc9-b11098677cba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki nagłówkowe\ext\ceSerial">
+      <UniqueIdentifier>{c0397b10-0af9-4e1d-a257-50803fca17ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe\ext\ceSerial">
+      <UniqueIdentifier>{6d347a6b-132c-49c6-927f-4c72c40b22eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -63,17 +63,11 @@
     <ClInclude Include="ext\enumser\enumser.h">
       <Filter>Pliki nagłówkowe\ext\enumser</Filter>
     </ClInclude>
-    <ClInclude Include="ext\SerialComHelper\DebugDump.h">
-      <Filter>Pliki nagłówkowe\ext\SerialComHelper</Filter>
-    </ClInclude>
-    <ClInclude Include="ext\SerialComHelper\SerialBuffer.h">
-      <Filter>Pliki nagłówkowe\ext\SerialComHelper</Filter>
-    </ClInclude>
-    <ClInclude Include="ext\SerialComHelper\SerialCommHelper.h">
-      <Filter>Pliki nagłówkowe\ext\SerialComHelper</Filter>
-    </ClInclude>
     <ClInclude Include="src\TCParser.hpp">
       <Filter>Pliki nagłówkowe\unused</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\serial-master\ceSerial.h">
+      <Filter>Pliki nagłówkowe\ext\ceSerial</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -98,17 +92,14 @@
     <ClCompile Include="ext\enumser\enumser.cpp">
       <Filter>Pliki źródłowe\ext\enumser</Filter>
     </ClCompile>
-    <ClCompile Include="ext\SerialComHelper\SerialBuffer.cpp">
-      <Filter>Pliki źródłowe\ext\SerialComHelper</Filter>
-    </ClCompile>
-    <ClCompile Include="ext\SerialComHelper\SerialCommHelper.cpp">
-      <Filter>Pliki źródłowe\ext\SerialComHelper</Filter>
-    </ClCompile>
     <ClCompile Include="src\TCtable.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\TCParser.cpp">
       <Filter>Pliki źródłowe\unused</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\serial-master\ceSerial.cpp">
+      <Filter>Pliki źródłowe\ext\ceSerial</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -8,7 +8,7 @@
 
 #include "TCManager.hpp"
 
-#define AVR_TB_VERSION "0.2.1"
+#define AVR_TB_VERSION "0.7.2"
 
 namespace tb
 {

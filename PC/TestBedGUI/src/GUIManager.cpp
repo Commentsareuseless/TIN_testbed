@@ -29,7 +29,7 @@ namespace tb
         case LogLevel::ERR:
             sprintf_s(logPrefix, "[ERROR]\t");
             break;
-        case LogLevel::DEBUG:
+        case LogLevel::DBG:
             sprintf_s(logPrefix, "[DEBUG]\t");
             break;
         }
@@ -62,8 +62,8 @@ namespace tb
 
     void GUIManager::PrintConsoleDebug(const std::string& message)
     {
-        if (logLvl.test((unsigned)LogLevel::DEBUG))
-            PrintConsole(message, LogLevel::DEBUG, wxYELLOW);
+        if (logLvl.test((unsigned)LogLevel::DBG))
+            PrintConsole(message, LogLevel::DBG, wxYELLOW);
     }
 
     void GUIManager::PrintTestState(const std::string& message, const TestResult result)
