@@ -50,54 +50,10 @@ SerialCom::SerialCom(const std::string& portName)
         isPortValid = false;
         return;
     }
-    //char buff[20] = {};
-    //sprintf_s(buff, "\\\\.\\%s", portName.c_str());
-    //std::string sPort{ "\\\\.\\COM3" };
-    //GUIManager::PrintConsoleError("Port " + sPort);
-    //serialComInstanceList[COMPort] = std::make_unique<CSerialCommHelper>();
-    //auto& COMInst = serialComInstanceList[COMPort];
-
- /*   FILE* comP = NULL;
-    comP = fopen(sPort.c_str(), "r+");
-    if (comP == NULL)
-    {
-        GUIManager::PrintConsoleError("Sth went wrong during port creation, with error " + std::to_string(GetLastError()));
-        return;
-    }*/
-    /*GUIManager::PrintConsoleInfo("Dzia³a lul");
-    fclose(comP);
-    return;*/
-
-
-    //HANDLE hCom;
-    //hCom = ::CreateFile((LPCWSTR)sPort.c_str(),
-    //    GENERIC_READ | GENERIC_WRITE,//access ( read and write)
-    //    0,	//(share) 0:cannot share the COM port						
-    //    nullptr,	//security  (None)				
-    //    OPEN_EXISTING,// creation : open_existing
-    //    0,//FILE_FLAG_OVERLAPPED,// we want overlapped operation
-    //    nullptr// no templates file for COM port...
-    //);
-
-    //if (hCom == INVALID_HANDLE_VALUE)
-    //{
-    //    GUIManager::PrintConsoleError("Sth went wrong during port creation, with error " + std::to_string(GetLastError()));
-    //}
-    //    isPortValid = false;
-    //return;
-    /*if (COMInst->Init(sPort) != S_OK)
-    {
-        GUIManager::PrintConsoleError("Sth went wrong during port creation, with error " + std::to_string(GetLastError()));
-        isPortValid = false;
-        return;
-    }
-    COMInst->Start();
-    */
 
     char buff[20] = {};
     sprintf_s(buff, "\\\\.\\%s", portName.c_str());
     std::string sPort{ buff };
-    GUIManager::PrintConsoleError("Port " + sPort);
     serialComInstanceList[COMPort] = std::make_unique<ce::ceSerial>(sPort, 9600, 8, 'N', 1);
 
     isPortValid = true;
@@ -124,7 +80,13 @@ bool SerialCom::PingCOM()
 
     if (!COMInst->IsOpened())
     {
-        COMInst->Open();
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return false;
+        }
     }
 
     Write2COM(PING_REQ);
@@ -157,13 +119,25 @@ void SerialCom::ReadCOM(std::string& messageBuff)
     int i = 0;
     char buff[40] = {0};
 
-    //messageBuff.reserve(20); // wild guess xD
     if (!COMInst)
     {
         GUIManager::PrintConsoleError("Port communication uninitialized");
         return;
     }
+
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return;
+        }
+        GUIManager::PrintConsoleDebug("Opened " + COMPort);
+    }
     
+    //messageBuff.reserve(20); // wild guess xD
     do{
         buff[i] = COMInst->ReadChar(succeededRead);
         ++i;
@@ -172,16 +146,94 @@ void SerialCom::ReadCOM(std::string& messageBuff)
     messageBuff = std::move(std::string{ buff });
 }
 
-void SerialCom::Write2COM(const std::string& message)
+void SerialCom::ReadByte(char* messageBuff)
 {
     auto& COMInst = serialComInstanceList[COMPort];
+    bool succeededRead = true;
+    char tmpBuff;
+
     if (!COMInst)
     {
         GUIManager::PrintConsoleError("Port communication uninitialized");
         return;
     }
 
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return;
+        }
+        GUIManager::PrintConsoleDebug("Opened " + COMPort);
+    }
+
+     tmpBuff = COMInst->ReadChar(succeededRead);
+
+     if (succeededRead)
+     {
+         *messageBuff = tmpBuff;
+     }
+     else
+     {
+         *messageBuff = 0xff;
+     }
+}
+
+void SerialCom::Write2COM(const std::string& message)
+{
+    auto& COMInst = serialComInstanceList[COMPort];
+
+    if (!COMInst)
+    {
+        GUIManager::PrintConsoleError("Port communication uninitialized");
+        return;
+    }
+
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return;
+        }
+        GUIManager::PrintConsoleDebug("Opened " + COMPort);
+    }
+
+
     COMInst->Write((char*)message.c_str(), message.size());
+}
+
+void SerialCom::WriteByte(const char message)
+{
+    auto& COMInst = serialComInstanceList[COMPort];
+
+    if (!COMInst)
+    {
+        GUIManager::PrintConsoleError("Port communication uninitialized");
+        return;
+    }
+
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return ;
+        }
+    }
+
+    char buff[1];
+
+    buff[0] = message;
+
+    COMInst->WriteChar(message);
 }
 
 }
