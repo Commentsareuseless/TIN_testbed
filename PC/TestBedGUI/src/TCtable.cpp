@@ -13,6 +13,8 @@
 #include "GUIManager.hpp"
 #include "SerialCom.hpp"
 
+#include "../ext/serial-master/ceSerial.h"
+
 #include <thread>
 #include <cstdint>
 
@@ -156,46 +158,47 @@ void TestGPIO()
 
 void TestAVR()
 {
-	char message = 0;
 	constexpr char WRITE_MASK	= 0b00111111;
 	constexpr char PORTB_MASK	= 0b11001111;
 	constexpr char SET_MASK		= 0b00001000;
 	constexpr char RES_MASK		= 0b11110111;
 	constexpr char PORTX_MASK	= 0b11111000;
 
-	SerialCom AVR_COM(GUIManager::GetSelectedCOM(ConnectedDevice::AVR));
+	std::string avr = GUIManager::GetSelectedCOM(ConnectedDevice::AVR);
+	if (avr.empty())
+	{
+		GUIManager::PrintConsoleError("Wybierz port!");
+		return;
+	}
 
-	// #1 message -> set pin 1 of PB
-	message = (WRITE_MASK & PORTB_MASK) | (SET_MASK) | (~PORTX_MASK) & 0x00;
-	AVR_COM.WriteByte(message);
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	std::string ComStr = "\\\\.\\" + avr;
 
-	GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
+	ce::ceSerial com(ComStr, 9600, 8, 'N', 1);
+	com.Open();
 
-	//for (uint8_t i{ 1 }; i < 0x7; ++i)
-	//{
-	//	// Set next pin 
-	//	message = (WRITE_MASK & PORTB_MASK) | (SET_MASK) | (~PORTX_MASK) & i;
-	//	AVR_COM.WriteByte(message);
-	//	GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
-	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	//	// reset prev pin
-	//	message = (WRITE_MASK & PORTB_MASK & RES_MASK) & ((~PORTX_MASK) & ~(i - 1));
-	//	AVR_COM.WriteByte(message);
-	//	GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
-	//	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	//}
 	char buf = 0;
+	char message = 0;
+	bool operationSuccesful{ true };
+
 	for (uint8_t i{ 0 }; i < 0xf; ++i)
 	{
 		message = i;
-		AVR_COM.WriteByte(message);
+		if (!com.WriteChar(message))
+		{
+			GUIManager::PrintConsoleError("Writting went wrong :(");
+			break;
+		}
 		GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
-		AVR_COM.ReadByte(&buf);
+		buf = com.ReadChar(operationSuccesful);
+		if (!operationSuccesful)
+		{
+			GUIManager::PrintConsoleError("Reading went wrong :(");
+			break;
+		}
 		GUIManager::PrintConsoleInfo("Recvd message: " + std::to_string(buf));
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
-
+	com.Close();
 	GUIManager::PrintTestState("Nie wiem czy dzia³ bo nie odpowiada hehe", TestResult::PASS);
 }
 
