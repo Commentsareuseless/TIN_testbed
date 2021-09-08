@@ -22,6 +22,10 @@ public:
 	bool PingCOM();
 	void ReadCOM(std::string& messageBuff);
 	void Write2COM(const std::string& message);
+	void WriteByte(const char message);
+	void ReadByte(char& buff);
+	void EnableDTR();
+	void DisableDTR();
 private:
 	SerialCom(SerialCom&) = delete;	// No copying, One COM = One class instance
 	std::string COMPort;

@@ -115,6 +115,16 @@ float ceSerial::GetStopBits() {
 	return stopbits;
 }
 
+void ceSerial::EnableDTR()
+{
+	enableDTR = DTR_CONTROL_ENABLE;
+}
+
+void ceSerial::DisableDTR()
+{
+	enableDTR = DTR_CONTROL_DISABLE;
+}
+
 
 #ifdef ceWINDOWS
 
@@ -183,7 +193,7 @@ long ceSerial::Open()
     dcb1.fOutxCtsFlow = false;
     dcb1.fOutxDsrFlow = false;
     dcb1.fOutX = false;
-    dcb1.fDtrControl = DTR_CONTROL_DISABLE;
+	dcb1.fDtrControl = enableDTR;//DTR_CONTROL_ENABLE;
     dcb1.fRtsControl = RTS_CONTROL_DISABLE;
     fSuccess = SetCommState(hComm, &dcb1);
     this->Delay(60);
@@ -205,7 +215,7 @@ long ceSerial::Open()
 
     if (!GetCommTimeouts(hComm, &timeouts_ori)) { return 8; } // Error getting time-outs.
     COMMTIMEOUTS timeouts;
-    timeouts.ReadIntervalTimeout = 20;
+    timeouts.ReadIntervalTimeout = 200;
     timeouts.ReadTotalTimeoutMultiplier = 15;
     timeouts.ReadTotalTimeoutConstant = 100;
     timeouts.WriteTotalTimeoutMultiplier = 15;
@@ -285,7 +295,7 @@ bool ceSerial::WriteChar(char ch)
 {
 	char s[2];
 	s[0]=ch;
-	s[1]=0;//null terminated
+	s[1]='\0';//null terminated
 	return Write(s);
 }
 

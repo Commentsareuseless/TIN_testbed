@@ -39,6 +39,7 @@ class ceSerial {
 	OVERLAPPED osWrite;
 	BOOL fWaitingOnRead;
 	COMMTIMEOUTS timeouts_ori;
+	DWORD enableDTR = 0;
 #else
 	long fd;//serial_fd
 #endif
@@ -70,6 +71,9 @@ public:
 	char GetParity();
 	void SetStopBits(float nbits);
 	float GetStopBits();
+
+	void EnableDTR();
+	void DisableDTR();
 };
 
 } // namespace ce 

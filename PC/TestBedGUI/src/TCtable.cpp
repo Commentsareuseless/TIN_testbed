@@ -13,6 +13,8 @@
 #include "GUIManager.hpp"
 #include "SerialCom.hpp"
 
+#include "../ext/serial-master/ceSerial.h"
+
 #include <thread>
 
 
@@ -138,6 +140,41 @@ void TestGPIO()
 	GUIManager::PrintTestState("Errors detected", TestResult::FAIL);
 }
 
+
+void TestAVR()
+{
+	constexpr char WRITE_MASK = 0b00111111;
+	constexpr char PORTB_MASK = 0b11001111;
+	constexpr char SET_MASK = 0b00001000;
+	constexpr char RES_MASK = 0b11110111;
+	constexpr char PORTX_MASK = 0b11111000;
+
+	std::string avr = GUIManager::GetSelectedCOM(ConnectedDevice::AVR);
+	if (avr.empty())
+	{
+		GUIManager::PrintConsoleError("Wybierz port!");
+		return;
+	}
+
+	SerialCom AVR(avr);
+	AVR.EnableDTR(); // avr works with DTR enabled
+	char buf = 0;
+	char message = 0;
+	bool operationSuccesful{ true };
+
+	for (uint8_t i{ 1 }; i < 0xf; ++i)
+	{
+		message = i;
+
+		GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
+		AVR.WriteByte(message);
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		AVR.ReadByte(buf);
+		GUIManager::PrintConsoleInfo("Recvd message: " + std::to_string(buf));
+	}
+	GUIManager::PrintTestState("Works :)", TestResult::PASS);
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // Table of all test cases used by TCManager 
 ///////////////////////////////////////////////////////////////////////////
@@ -145,7 +182,8 @@ void TestGPIO()
 TCMap TCManager::listOfTCs{
 	{"ExampleTest", TestCase("ExampleTest", ExampleTest)},
 	{"TestSerialCommunication", TestCase("TestSerialCommunication", TestSerialCommunication)},
-	{"TestGPIO", TestCase("TestGPIO", TestGPIO)}
+	{"TestGPIO", TestCase("TestGPIO", TestGPIO)},
+	{"TestAVR", TestCase("TestAVR", TestAVR)}
 };
 
 } // namespace tb
