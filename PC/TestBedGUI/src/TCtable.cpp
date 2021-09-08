@@ -16,6 +16,7 @@
 #include "../ext/serial-master/ceSerial.h"
 
 #include <thread>
+#include <cstdint>
 
 
 namespace tb
@@ -53,7 +54,7 @@ enum RWFlagMASK : uint8_t
 
 void ExampleTest()
 {
-	GUIManager::PrintTestState("Przyk³adowy test", TestResult::PASS);
+	GUIManager::PrintTestState("Przykï¿½adowy test", TestResult::PASS);
 }
 
 void TestSerialCommunication()
@@ -61,27 +62,42 @@ void TestSerialCommunication()
 	std::string avr{ GUIManager::GetSelectedCOM(ConnectedDevice::AVR) };
 	std::string stm{ GUIManager::GetSelectedCOM(ConnectedDevice::STM) };
 
-	if (avr == stm || stm.empty())
+	if (avr == stm)
 	{
-		GUIManager::PrintConsoleInfo("Specified 2 the same ports or only 1 port, pinging once");
-		if (!avr.empty())
+		GUIManager::PrintConsoleInfo("Specified 2 same ports, pinging once");
+		SerialCom COM(avr);
+		if (COM.PingCOM())
 		{
-			SerialCom COM(avr);
-			if (COM.PingCOM())
-			{
-				GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
-				return;
-			}
+			GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+			return;
 		}
-		else
+		GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
+		return;
+	}
+
+	if (stm.empty())
+	{
+		GUIManager::PrintConsoleInfo("Pinging only avr");
+		SerialCom COM(avr);
+		if (COM.PingCOM())
 		{
-			SerialCom COM(stm);
-			if (COM.PingCOM())
-			{
-				GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
-				return;
-			}
+			GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+			return;
 		}
+		GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
+		return;
+	}
+	if(avr.empty())
+	{
+		GUIManager::PrintConsoleInfo("Pinging only stm");
+		SerialCom COM(stm);
+		if (COM.PingCOM())
+		{
+			GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
+			return;
+		}
+		GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
+		return;
 	}
 
 	SerialCom STM_COM(stm);

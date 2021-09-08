@@ -88,7 +88,13 @@ bool SerialCom::PingCOM()
 
     if (!COMInst->IsOpened())
     {
-        COMInst->Open();
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return false;
+        }
     }
 
     Write2COM(PING_REQ);
@@ -121,11 +127,22 @@ void SerialCom::ReadCOM(std::string& messageBuff)
     int i = 0;
     char buff[40] = {0};
 
-    //messageBuff.reserve(20); // wild guess xD
     if (!COMInst)
     {
         GUIManager::PrintConsoleError("Port communication uninitialized");
         return;
+    }
+
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return;
+        }
+        GUIManager::PrintConsoleDebug("Opened " + COMPort);
     }
     
     OpenPortIfNotOpened(COMPort);
@@ -138,9 +155,46 @@ void SerialCom::ReadCOM(std::string& messageBuff)
     messageBuff = std::move(std::string{ buff });
 }
 
+void SerialCom::ReadByte(char* messageBuff)
+{
+    auto& COMInst = serialComInstanceList[COMPort];
+    bool succeededRead = true;
+    char tmpBuff;
+
+    if (!COMInst)
+    {
+        GUIManager::PrintConsoleError("Port communication uninitialized");
+        return;
+    }
+
+    if (!COMInst->IsOpened())
+    {
+        int err = 0;
+        err = COMInst->Open();
+        if (err != 0)
+        {
+            GUIManager::PrintConsoleError("Could not open port, reason: " + std::to_string(err));
+            return;
+        }
+        GUIManager::PrintConsoleDebug("Opened " + COMPort);
+    }
+
+     tmpBuff = COMInst->ReadChar(succeededRead);
+
+     if (succeededRead)
+     {
+         *messageBuff = tmpBuff;
+     }
+     else
+     {
+         *messageBuff = 0xff;
+     }
+}
+
 void SerialCom::Write2COM(const std::string& message)
 {
     auto& COMInst = serialComInstanceList[COMPort];
+
     if (!COMInst)
     {
         GUIManager::PrintConsoleError("Port communication uninitialized");
