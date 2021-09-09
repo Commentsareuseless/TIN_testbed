@@ -21,6 +21,15 @@
 
 namespace tb
 {
+
+	constexpr uint8_t cmd_set = (1 << 3);
+	constexpr uint8_t cmd_rst = ~(1 << 3);
+	constexpr uint8_t cmd_PORTB = 0b00000000;
+	constexpr uint8_t cmd_PORTC = 0b00010000;
+	constexpr uint8_t cmd_PORTD = 0b00100000;
+	constexpr uint8_t cmd_PORTE = 0b00110000;
+	constexpr uint8_t cmd_WRITE = 0b01000000;
+
 enum TypeOfTestMASKS : uint8_t
 {
 	GPIO= 0b00010000,
@@ -47,6 +56,21 @@ enum RWFlagMASK : uint8_t
 // Helper functions 
 ///////////////////////////////////////////////////////////////////////////
 
+void TestPortW(uint8_t portMask, uint8_t startPin, uint8_t numOfPins,
+				SerialCom* AVR, uint8_t SRFlag = 0)
+{
+	uint8_t command, message;
+	command = 0;
+	command = portMask | cmd_WRITE;
+	for (uint8_t i{ startPin }; i < startPin + numOfPins; ++i)
+	{
+		message = command | i;
+
+		AVR->WriteByte(message | SRFlag);
+		//GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message | SRFlag));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Test case functions 
@@ -75,10 +99,11 @@ void TestSerialCommunication()
 		return;
 	}
 
-	if (stm.empty())
+	if (stm == "COM-1")
 	{
 		GUIManager::PrintConsoleInfo("Pinging only avr");
 		SerialCom COM(avr);
+		COM.EnableDTR();
 		if (COM.PingCOM())
 		{
 			GUIManager::PrintTestState("Succesful ping", TestResult::PASS);
@@ -87,7 +112,7 @@ void TestSerialCommunication()
 		GUIManager::PrintTestState("Unsuccesful ping", TestResult::FAIL);
 		return;
 	}
-	if(avr.empty())
+	if(avr == "COM-1")
 	{
 		GUIManager::PrintConsoleInfo("Pinging only stm");
 		SerialCom COM(stm);
@@ -114,31 +139,48 @@ void TestSerialCommunication()
 
 void TestGPIO()
 {
-	constexpr char AVR_SET_PINS_ON_PA[] = { "STPA" };
-	constexpr char STM_READ_AVR_PA[] = { "RDPA" };
-	constexpr char EXPECTED_BITS_IN_PA[] = { "11111" };
+	constexpr char STM_READ_AVR_AL[] = { "RDAL" };
+	constexpr char EXPECTED_BITS_IN_PB[] = { "111111" };
+	constexpr char EXPECTED_BITS_IN_PC[] = { "111111" };
+	constexpr char EXPECTED_BITS_IN_PD[] = { "00111111" };
+	constexpr char EXPECTED_BITS_IN_AL[] = { "111111" "111111" "00111111""0000" };
+
 
 	bool testVerdict{ true };
 
 	std::string messageBuff{};
 
-	SerialCom AVR_COM(GUIManager::GetSelectedCOM(ConnectedDevice::AVR));
-	SerialCom STM_COM(GUIManager::GetSelectedCOM(ConnectedDevice::STM));
+	std::string avr{ GUIManager::GetSelectedCOM(ConnectedDevice::AVR) };
+	std::string stm{ GUIManager::GetSelectedCOM(ConnectedDevice::STM) };
 
-	AVR_COM.Write2COM(AVR_SET_PINS_ON_PA);
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));	// Make sure avr finished (with some BIG margin hehe)
-	STM_COM.Write2COM(STM_READ_AVR_PA);
+	if (avr == "COM-1" || stm == "COM-1")
+	{
+		GUIManager::PrintConsoleError("Invalid coms");
+	}
+	//*
+	SerialCom AVR_COM(avr);
+	AVR_COM.EnableDTR();
+
+
+	TestPortW(cmd_PORTB, 0, 6, &AVR_COM, cmd_set);
+	TestPortW(cmd_PORTC, 0, 6, &AVR_COM, cmd_set);
+	TestPortW(cmd_PORTD, 2, 6, &AVR_COM, cmd_set);
+	//testVerdict = true;
+	SerialCom STM_COM(stm);
+
+//*
+	STM_COM.Write2COM(STM_READ_AVR_AL);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	STM_COM.ReadCOM(messageBuff);
-
+	GUIManager::PrintConsoleInfo("Got message " + messageBuff);
 	try
 	{
 		for (int i{ 0 }; i < messageBuff.size(); ++i)
 		{
-			if (messageBuff[i] != EXPECTED_BITS_IN_PA[i])
+			if (messageBuff[i] != EXPECTED_BITS_IN_AL[i])
 			{
 				GUIManager::PrintConsoleError("Unexpected state on pin " + std::to_string(i));
-				GUIManager::PrintConsoleInfo("Expected " + EXPECTED_BITS_IN_PA[i]);
+				GUIManager::PrintConsoleInfo("Expected " + EXPECTED_BITS_IN_AL[i]);
 				testVerdict = false;
 			}
 		}
@@ -147,7 +189,7 @@ void TestGPIO()
 	{
 		GUIManager::PrintTestState("Errors detected " + std::string{exc.what()}, TestResult::FAIL);
 		return;
-	}
+	}//*/
 	if (testVerdict)
 	{
 		GUIManager::PrintTestState("GPIO works", TestResult::PASS);
@@ -159,11 +201,14 @@ void TestGPIO()
 
 void TestAVR()
 {
-	constexpr char WRITE_MASK = 0b00111111;
-	constexpr char PORTB_MASK = 0b11001111;
-	constexpr char SET_MASK = 0b00001000;
-	constexpr char RES_MASK = 0b11110111;
-	constexpr char PORTX_MASK = 0b11111000;
+	constexpr uint8_t g_Command = 0;
+	constexpr uint8_t g_typeOfCommand = (g_Command >> 6);
+	constexpr uint8_t g_gpioPort = ((g_Command >> 4) & 3);
+	constexpr uint8_t g_gpioSR = ((g_Command >> 3) | 1); //1 = set; 0 = reset;
+	constexpr uint8_t g_gpioPin = (g_Command & 7);
+
+
+	uint8_t command = 0;
 
 	std::string avr = GUIManager::GetSelectedCOM(ConnectedDevice::AVR);
 	if (avr.empty())
@@ -178,6 +223,46 @@ void TestAVR()
 	char message = 0;
 	bool operationSuccesful{ true };
 
+	// Iterate PORTB
+	command = 0;
+	command = cmd_PORTB | cmd_WRITE;
+	for (uint8_t i{ 0 }; i < 0x6; ++i)
+	{
+		message = command | i;
+
+		GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
+		AVR.WriteByte(message | cmd_set);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		AVR.WriteByte(message);
+	}
+
+	// Iterate PORTC
+	command = 0;
+	command = cmd_PORTC | cmd_WRITE;
+	for (uint8_t i{ 0 }; i < 0x6; ++i)
+	{
+		message = command | i;
+
+		GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
+		AVR.WriteByte(message | cmd_set);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		AVR.WriteByte(message);
+	}
+
+	// Iterate PORTD
+	command = 0;
+	command = cmd_PORTD | cmd_WRITE;
+	for (uint8_t i{ 2 }; i < 0x8; ++i)
+	{
+		message = command | i;
+
+		GUIManager::PrintConsoleInfo("Sending message: " + std::to_string(message));
+		AVR.WriteByte(message | cmd_set);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		AVR.WriteByte(message);
+	}
+
+	/*
 	for (uint8_t i{ 1 }; i < 0xf; ++i)
 	{
 		message = i;
@@ -188,6 +273,7 @@ void TestAVR()
 		AVR.ReadByte(buf);
 		GUIManager::PrintConsoleInfo("Recvd message: " + std::to_string(buf));
 	}
+	*/
 	GUIManager::PrintTestState("Works :)", TestResult::PASS);
 }
 
