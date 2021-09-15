@@ -7,37 +7,6 @@
 
 #include <xc.h>
 #include <avr/iom328pb.h>
-/*******************************************************************************
- * File:		main.c
- *
- * Project:		8avr-mega-usart-example-polled
- *
- * Description:	Demonstrate basic polled usart configuration/usage
- *				
- *				100mS Timer1 ISR is used to create tick events.
- *
- *				Main loop monitors tick events to toggle the LED and track time.
- *				
- *				Elapsed time (HH:MM:SS) is output to a terminal via USART0 once
- *				every second. "u" command updates the clock display, "f" command
- *				freezes the clock display (time is still incremented).
- * 
- * Date:		08-June-2017	
- * Revision:
- * Author:
- *
- * Hardware:	ATmega328PB Xplained Mini PCB Rev 3
- *
- *				Clock:		16MHz (External - from EDBG IC)
- *				LED0:		PB5
- *				SW0:		PB7
- *				UART_TX:	TXD/PD1 (Connected to EDBG IC RXD)
- *				UART_RX:	RXD/PD0 (Connected to EDBG IC TXD)
- *
- * Fuses:		High:		0xDF
- *				Low:		0xC0
- *				Ext:		0xFC
- ******************************************************************************/ 
 
 /*** MACROS *******************************************************************/
 
@@ -76,34 +45,6 @@ int main(void)
 	while(1){
 		g_Command = (uint8_t) USART0_GetChar();
 
-		/*
-		if(g_Command == (uint8_t)'P') {
-			g_Command = (uint8_t) USART0_GetChar();
-			if(g_Command == (uint8_t)'I') {
-				g_Command = (uint8_t) USART0_GetChar();
-				if(g_Command == (uint8_t)'N') {
-					g_Command = (uint8_t) USART0_GetChar();
-					if(g_Command == (uint8_t)'G') {
-						char buff[5] = "PONG";
-						USART0_PutString(buff);
-						break;
-					}
-				}
-			}
-		}
-		//*/
-		
-		
-
-		/*echo
-		if (g_Command != 0b11000000)
-			USART0_Put(g_Command);
-			//*/
-
-		//main
-		//*
-		//g_Command -= 65;
-		//g_Command -= 65;
 		uint8_t g_typeOfCommand = (g_Command >> 6);
 		uint8_t g_gpioPort = ((g_Command >> 4) & 3);
 		uint8_t g_gpioSR = ((g_Command >> 3) & 1); //1 = set; 0 = reset;
@@ -249,10 +190,3 @@ char USART0_GetChar(void){
 	return 0b00000000;
 
 } // USART0_GetChar()
-
-
-/*******************************************************************************
-SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
-EITHER EXPRESS OR IMPLIED.
-*******************************************************************************/
-
