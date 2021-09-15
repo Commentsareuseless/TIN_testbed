@@ -45,8 +45,7 @@ Dla STM
 
 Dla AVR
 (Komunikacja zachodzi przez 1 bajt, dlatego wymienione zostaną poszczególne "pola bitowe")
-
-ANRRZEJ WE TO NAPISZ PLZ
+Wszystko przedstawia obrazek `UARTmsgAVR.png`
 
 ### UWAGA
 
